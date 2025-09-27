@@ -1,0 +1,25 @@
+{
+  "name": "importmaps-systemjs-demo",
+  "version": "1.0.0",
+  "description": "Import Maps + SystemJS Microfrontend Demo",
+  "scripts": {
+    "start": "npx http-server . -p 5500 -c-1",
+    "build:mfes": "npm run build:home && npm run build:products && npm run build:cart && npm run build:checkout && npm run build:orders",
+    "build:home": "esbuild ../module-federation/home/src/Home.jsx --bundle --format=esm --outfile=mfe-builds/home.js --loader:.js=jsx --loader:.jsx=jsx --loader:.css=text --external:react --external:react-dom",
+    "build:products": "esbuild ../module-federation/product-catalog/src/ProductCatalog.jsx --bundle --format=esm --outfile=mfe-builds/products.js --loader:.js=jsx --loader:.jsx=jsx --loader:.css=text --external:react --external:react-dom",
+    "build:cart": "esbuild ../module-federation/cart/src/Cart.jsx --bundle --format=esm --outfile=mfe-builds/cart.js --loader:.js=jsx --loader:.jsx=jsx --loader:.css=text --external:react --external:react-dom",
+    "build:checkout": "esbuild ../module-federation/checkout/src/Checkout.jsx --bundle --format=esm --outfile=mfe-builds/checkout.js --loader:.js=jsx --loader:.jsx=jsx --loader:.css=text --external:react --external:react-dom",
+    "build:orders": "esbuild ../module-federation/orders/src/Orders.jsx --bundle --format=esm --outfile=mfe-builds/orders.js --loader:.js=jsx --loader:.jsx=jsx --loader:.css=text --external:react --external:react-dom",
+    "build:systemjs": "npm run build:home:systemjs && npm run build:products:systemjs && npm run build:cart:systemjs && npm run build:checkout:systemjs && npm run build:orders:systemjs",
+    "build:home:systemjs": "esbuild ../module-federation/home/src/Home.jsx --bundle --format=iife --global-name=MFEHome --outfile=mfe-builds/home.system.js --loader:.js=jsx --loader:.jsx=jsx --external:react --external:react-dom",
+    "build:products:systemjs": "esbuild ../module-federation/product-catalog/src/ProductCatalog.jsx --bundle --format=iife --global-name=MFEProducts --outfile=mfe-builds/products.system.js --loader:.js=jsx --loader:.jsx=jsx --external:react --external:react-dom",
+    "build:cart:systemjs": "esbuild ../module-federation/cart/src/Cart.jsx --bundle --format=iife --global-name=MFECart --outfile=mfe-builds/cart.system.js --loader:.js=jsx --loader:.jsx=jsx --external:react --external:react-dom",
+    "build:checkout:systemjs": "esbuild ../module-federation/checkout/src/Checkout.jsx --bundle --format=iife --global-name=MFECheckout --outfile=mfe-builds/checkout.system.js --loader:.js=jsx --loader:.jsx=jsx --external:react --external:react-dom",
+    "build:orders:systemjs": "esbuild ../module-federation/orders/src/Orders.jsx --bundle --format=iife --global-name=MFEOrders --outfile=mfe-builds/orders.system.js --loader:.js=jsx --loader:.jsx=jsx --external:react --external:react-dom"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.0",
+    "http-server": "^14.1.1"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}

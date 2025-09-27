@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Single-SPA E-Commerce Demo</title>
+  
+  <!-- Import Maps for Shared Dependencies -->
+  <script type="systemjs-importmap">
+    {
+      "imports": {
+        "react": "https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js",
+        "react-dom": "https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js",
+        "single-spa": "https://cdn.jsdelivr.net/npm/single-spa@5/lib/system/single-spa.min.js",
+        "single-spa-react": "https://cdn.jsdelivr.net/npm/single-spa-react@5/lib/system/single-spa-react.min.js",
+        "@mfe/root-config": "/root-config.js",
+        "@mfe/home": "/mfe-builds/home.js",
+        "@mfe/products": "/mfe-builds/products.js",
+        "@mfe/cart": "/mfe-builds/cart.js",
+        "@mfe/checkout": "/mfe-builds/checkout.js",
+        "@mfe/orders": "/mfe-builds/orders.js"
+      }
+    }
+  </script>
+
+  <!-- SystemJS for Module Loading -->
+  <script src="https://cdn.jsdelivr.net/npm/systemjs@6/dist/system.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/systemjs@6/dist/extras/amd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/systemjs@6/dist/extras/named-exports.min.js"></script>
+
+  <style>
+    /* Global Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f7fa;
+      min-height: 100vh;
+    }
+
+    /* Layout Container */
+    #single-spa-application {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .app-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-decoration: none;
+      color: white;
+    }
+
+    /* Navigation */
+    .main-nav {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .nav-link {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      transition: all 0.3s;
+    }
+
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-link.active {
+      background: white;
+      color: #667eea;
+    }
+
+    /* User Info */
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .cart-badge {
+      background: white;
+      color: #667eea;
+      padding: 0.25rem 0.5rem;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+
+    /* Main Content Area */
+    #mfe-container {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    /* Loading State */
+    .loading {
+      text-align: center;
+      padding: 4rem;
+      font-size: 1.2rem;
+      color: #666;
+    }
+
+    .loading::after {
+      content: '...';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+
+    /* Footer */
+    .app-footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      margin-top: auto;
+    }
+
+    /* Notifications */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .notification.success {
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Single-SPA Status Indicator */
+    .spa-status {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 15px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 999;
+    }
+
+    .spa-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4caf50;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  <div id="single-spa-application">
+    <!-- Header with Navigation -->
+    <header class="app-header">
+      <div class="header-content">
+        <a href="/" class="logo">🛍️ Single-SPA E-Commerce</a>
+        
+        <nav class="main-nav">
+          <a href="/" class="nav-link" id="nav-home">Home</a>
+          <a href="/products" class="nav-link" id="nav-products">Products</a>
+          <a href="/cart" class="nav-link" id="nav-cart">Cart <span class="cart-badge" id="cart-count">0</span></a>
+          <a href="/checkout" class="nav-link" id="nav-checkout">Checkout</a>
+          <a href="/orders" class="nav-link" id="nav-orders">Orders</a>
+        </nav>
+        
+        <div class="user-info">
+          <span id="user-display">Guest</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main MFE Container -->
+    <main id="mfe-container">
+      <div class="loading">Loading Single-SPA applications...</div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Single-SPA Demo - Framework-Agnostic Microfrontend Orchestration</p>
+    </footer>
+
+    <!-- Single-SPA Status Indicator -->
+    <div class="spa-status">
+      <span class="spa-status-dot"></span>
+      <span>Single-SPA Active</span>
+    </div>
+  </div>
+
+  <!-- Notification Container -->
+  <div id="notification-container"></div>
+
+  <script>
+    // Initialize Event Bus
+    window.eventBus = {
+      emit(event, data) {
+        console.log('[EventBus] Emit:', event, data);
+        const customEvent = new CustomEvent(event, { detail: data });
+        window.dispatchEvent(customEvent);
+      },
+      on(event, handler) {
+        console.log('[EventBus] Subscribe:', event);
+        window.addEventListener(event, handler);
+      },
+      off(event, handler) {
+        console.log('[EventBus] Unsubscribe:', event);
+        window.removeEventListener(event, handler);
+      }
+    };
+
+    // Cart State Management
+    let cartItems = [];
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      cartItems = JSON.parse(savedCart);
+      updateCartCount();
+    }
+
+    // Listen for cart events
+    window.eventBus.on('cart:add', (event) => {
+      const { product } = event.detail;
+      const existingItem = cartItems.find(item => item.id === product.id);
+      
+      if (existingItem) {
+        existingItem.quantity = (existingItem.quantity || 1) + (product.quantity || 1);
+      } else {
+        cartItems.push({ ...product, quantity: product.quantity || 1 });
+      }
+      
+      localStorage.setItem('cart', JSON.stringify(cartItems));
+      updateCartCount();
+      showNotification(`${product.name} added to cart!`);
+    });
+
+    window.eventBus.on('cart:update', (event) => {
+      cartItems = event.detail.items;
+      localStorage.setItem('cart', JSON.stringify(cartItems));
+      updateCartCount();
+    });
+
+    window.eventBus.on('cart:clear', () => {
+      cartItems = [];
+      localStorage.removeItem('cart');
+      updateCartCount();
+    });
+
+    function updateCartCount() {
+      const count = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+      document.getElementById('cart-count').textContent = count;
+    }
+
+    // Notification System
+    function showNotification(message, type = 'success') {
+      const container = document.getElementById('notification-container');
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      
+      container.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    // Update navigation active state
+    function updateNavigation() {
+      const path = window.location.pathname;
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === path) {
+          link.classList.add('active');
+        }
+      });
+    }
+
+    // Listen for route changes
+    window.addEventListener('single-spa:routing-event', updateNavigation);
+    updateNavigation();
+
+    // Load Single-SPA Root Config
+    System.import('@mfe/root-config');
+  </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "module-federation-demo",
+  "version": "1.0.0",
+  "description": "Module Federation Microfrontend Demo",
+  "scripts": {
+    "start:all": "concurrently \"npm run start:shell\" \"npm run start:home\" \"npm run start:products\" \"npm run start:cart\" \"npm run start:checkout\" \"npm run start:orders\"",
+    "start:shell": "cd shell && npm start",
+    "start:home": "cd home && npm start",
+    "start:products": "cd product-catalog && npm start",
+    "start:cart": "cd cart && npm start",
+    "start:checkout": "cd checkout && npm start",
+    "start:orders": "cd orders && npm start",
+    "install:all": "npm install && cd shell && npm install && cd ../home && npm install && cd ../product-catalog && npm install && cd ../cart && npm install && cd ../checkout && npm install && cd ../orders && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "author": "",
+  "license": "MIT",
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}

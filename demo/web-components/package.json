@@ -1,0 +1,11 @@
+{
+  "name": "web-components-demo",
+  "version": "1.0.0",
+  "description": "Web Components Microfrontend Demo",
+  "scripts": {
+    "start": "node start-server.js"
+  },
+  "keywords": ["microfrontend", "web-components", "custom-elements", "shadow-dom"],
+  "author": "",
+  "license": "MIT"
+}

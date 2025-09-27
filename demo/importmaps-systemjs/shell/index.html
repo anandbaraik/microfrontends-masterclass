@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Import Maps + SystemJS MFE Demo</title>
+  
+  <!-- Import Map for native browser support -->
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18.2.0",
+      "react-dom": "https://esm.sh/react-dom@18.2.0",
+      "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+      "@mfe/home": "/mfe-builds/home.js",
+      "@mfe/products": "/mfe-builds/products.js",
+      "@mfe/cart": "/mfe-builds/cart.js",
+      "@mfe/checkout": "/mfe-builds/checkout.js",
+      "@mfe/orders": "/mfe-builds/orders.js"
+    }
+  }
+  </script>
+
+  <!-- SystemJS for browsers without import map support -->
+  <script src="https://cdn.jsdelivr.net/npm/systemjs@6.14.2/dist/system.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/systemjs@6.14.2/dist/extras/named-register.min.js"></script>
+  
+  <!-- ES Module Shims for import maps polyfill -->
+  <script async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    .app-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .app-header {
+      background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+      color: white;
+      padding: 1rem 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    
+    .main-nav {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .nav-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1rem;
+    }
+    
+    .nav-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    
+    .nav-btn.active {
+      background: white;
+      color: #43cea2;
+    }
+    
+    .cart-badge {
+      background: #ff4757;
+      color: white;
+      border-radius: 50%;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+    }
+    
+    .user-info {
+      padding: 0.5rem 1rem;
+      background: rgba(255,255,255,0.2);
+      border-radius: 20px;
+    }
+    
+    .app-main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 4rem;
+      font-size: 1.2rem;
+      color: #666;
+    }
+    
+    .error {
+      background: white;
+      border-radius: 10px;
+      padding: 2rem;
+      text-align: center;
+      color: #e74c3c;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .app-footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      color: white;
+      transform: translateX(400px);
+      transition: transform 0.3s;
+      z-index: 1000;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .notification.success { background: #27ae60; }
+    .notification.error { background: #e74c3c; }
+    .notification.info { background: #3498db; }
+    
+    .import-info {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+      font-size: 0.9rem;
+    }
+    
+    .import-info h4 {
+      color: #43cea2;
+      margin-bottom: 0.5rem;
+    }
+    
+    .import-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    
+    .status-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #27ae60;
+    }
+    
+    .status-indicator.loading {
+      background: #f39c12;
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <h1 class="logo">🚀 Import Maps + SystemJS MFE</h1>
+        <nav class="main-nav">
+          <button class="nav-btn active" data-route="home">Home</button>
+          <button class="nav-btn" data-route="products">Products</button>
+          <button class="nav-btn" data-route="cart">
+            Cart <span class="cart-badge">0</span>
+          </button>
+          <button class="nav-btn" data-route="checkout">Checkout</button>
+          <button class="nav-btn" data-route="orders">Orders</button>
+        </nav>
+        <div class="user-info">
+          <span id="userName">Guest</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main" id="app-content">
+      <div class="loading">Loading microfrontend...</div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Import Maps + SystemJS Demo - Dynamic ESM Loading with Cross-MFE Communication</p>
+    </footer>
+  </div>
+
+  <!-- Notification -->
+  <div id="notification" class="notification"></div>
+
+  <!-- Import Status Info -->
+  <div class="import-info">
+    <h4>Module Loading</h4>
+    <div id="loadingStatus">
+      <div class="import-status">
+        <span class="status-indicator" id="statusIndicator"></span>
+        <span id="statusText">Ready</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Event Bus -->
+  <script>
+    // Global Event Bus for Cross-MFE Communication
+    window.eventBus = {
+      emit: (eventName, data = {}) => {
+        console.log(`[EventBus] Emitting: ${eventName}`, data);
+        const event = new CustomEvent(eventName, { 
+          detail: data,
+          bubbles: true,
+          cancelable: true 
+        });
+        window.dispatchEvent(event);
+      },
+      on: (eventName, handler) => {
+        console.log(`[EventBus] Subscribing to: ${eventName}`);
+        window.addEventListener(eventName, handler);
+        return handler;
+      },
+      off: (eventName, handler) => {
+        console.log(`[EventBus] Unsubscribing from: ${eventName}`);
+        window.removeEventListener(eventName, handler);
+      }
+    };
+  </script>
+
+  <!-- Shell Application -->
+  <script type="module">
+    // Check for native import maps support
+    const supportsImportMaps = HTMLScriptElement.supports && HTMLScriptElement.supports('importmap');
+    console.log('Native import maps support:', supportsImportMaps);
+
+    class ShellApp {
+      constructor() {
+        this.currentRoute = 'home';
+        this.cartItems = [];
+        this.user = null;
+        this.loadedModules = {};
+        this.init();
+      }
+
+      async init() {
+        this.setupNavigation();
+        this.setupEventListeners();
+        this.loadCartFromStorage();
+        await this.loadMFE('home');
+      }
+
+      setupNavigation() {
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const route = e.target.dataset.route;
+            await this.navigate(route);
+          });
+        });
+      }
+
+      async navigate(route) {
+        this.currentRoute = route;
+        
+        // Update active nav button
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.route === route);
+        });
+
+        // Load and render MFE
+        await this.loadMFE(route);
+      }
+
+      async loadMFE(name) {
+        const container = document.getElementById('app-content');
+        
+        // Show loading state
+        this.updateLoadingStatus('loading', `Loading ${name} module...`);
+        container.innerHTML = '<div class="loading">Loading microfrontend...</div>';
+
+        // Load CSS for the MFE
+        this.loadMFEStyles(name);
+
+        try {
+          let module;
+          
+          // Try to use native dynamic import first
+          if (supportsImportMaps) {
+            console.log(`Loading ${name} via native import`);
+            module = await import(`@mfe/${name}`);
+          } else {
+            console.log(`Loading ${name} via SystemJS`);
+            // Fallback to SystemJS
+            await this.configureSystemJS();
+            module = await System.import(`@mfe/${name}`);
+          }
+
+          // Cache the module
+          this.loadedModules[name] = module;
+
+          // Get the component
+          const Component = module.default || module[Object.keys(module)[0]];
+          
+          if (Component) {
+            // Create a container for React
+            container.innerHTML = '<div id="mfe-root"></div>';
+            const root = document.getElementById('mfe-root');
+            
+            // Get React and ReactDOM
+            let React, ReactDOM;
+            if (supportsImportMaps) {
+              React = await import('react');
+              ReactDOM = await import('react-dom');
+            } else {
+              React = await System.import('react');
+              ReactDOM = await System.import('react-dom');
+            }
+
+            // Render the component
+            const props = this.getPropsForMFE(name);
+            const element = React.createElement(Component, props);
+            ReactDOM.default.createRoot(root).render(element);
+            
+            this.updateLoadingStatus('success', `${name} loaded`);
+          } else {
+            throw new Error(`Component not found in module ${name}`);
+          }
+        } catch (error) {
+          console.error(`Error loading MFE ${name}:`, error);
+          container.innerHTML = `
+            <div class="error">
+              <h2>⚠️ Error Loading Microfrontend</h2>
+              <p>Failed to load ${name} module</p>
+              <details>
+                <summary>Error Details</summary>
+                <pre>${error.message}</pre>
+              </details>
+            </div>
+          `;
+          this.updateLoadingStatus('error', `Failed to load ${name}`);
+        }
+      }
+
+      async configureSystemJS() {
+        // Configure SystemJS if not already done
+        if (!window.SystemJSConfigured) {
+          System.config({
+            map: {
+              'react': 'https://esm.sh/react@18.2.0',
+              'react-dom': 'https://esm.sh/react-dom@18.2.0',
+              '@mfe/home': '/mfe-builds/home.js',
+              '@mfe/products': '/mfe-builds/products.js',
+              '@mfe/cart': '/mfe-builds/cart.js',
+              '@mfe/checkout': '/mfe-builds/checkout.js',
+              '@mfe/orders': '/mfe-builds/orders.js'
+            }
+          });
+          window.SystemJSConfigured = true;
+        }
+      }
+
+      getPropsForMFE(name) {
+        switch(name) {
+          case 'cart':
+            return { items: this.cartItems };
+          case 'checkout':
+            return { items: this.cartItems, user: this.user };
+          case 'orders':
+            return { user: this.user };
+          default:
+            return {};
+        }
+      }
+
+      setupEventListeners() {
+        // Cart events
+        window.eventBus.on('cart:add', (e) => {
+          this.addToCart(e.detail.product);
+        });
+
+        window.eventBus.on('cart:remove', (e) => {
+          this.removeFromCart(e.detail.productId);
+        });
+
+        window.eventBus.on('cart:clear', () => {
+          this.clearCart();
+        });
+
+        window.eventBus.on('cart:update', (e) => {
+          this.cartItems = e.detail.items;
+          this.saveCart();
+          this.updateCartBadge();
+        });
+
+        // Navigation events
+        window.eventBus.on('navigate', (e) => {
+          this.navigate(e.detail.route);
+        });
+
+        // User events
+        window.eventBus.on('user:login', (e) => {
+          this.loginUser(e.detail.user);
+        });
+
+        window.eventBus.on('user:logout', () => {
+          this.logoutUser();
+        });
+
+        // Notification events
+        window.eventBus.on('notification:show', (e) => {
+          this.showNotification(e.detail);
+        });
+      }
+
+      addToCart(product) {
+        const existingItem = this.cartItems.find(item => item.id === product.id);
+        
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          this.cartItems.push({ ...product, quantity: 1 });
+        }
+        
+        this.saveCart();
+        this.updateCartBadge();
+        this.showNotification({
+          type: 'success',
+          message: `${product.name} added to cart!`
+        });
+      }
+
+      removeFromCart(productId) {
+        this.cartItems = this.cartItems.filter(item => item.id !== productId);
+        this.saveCart();
+        this.updateCartBadge();
+      }
+
+      clearCart() {
+        this.cartItems = [];
+        this.saveCart();
+        this.updateCartBadge();
+      }
+
+      loginUser(user) {
+        this.user = user;
+        sessionStorage.setItem('user', JSON.stringify(user));
+        document.getElementById('userName').textContent = `👤 ${user.name}`;
+        this.showNotification({
+          type: 'success',
+          message: `Welcome, ${user.name}!`
+        });
+      }
+
+      logoutUser() {
+        this.user = null;
+        sessionStorage.removeItem('user');
+        document.getElementById('userName').textContent = 'Guest';
+      }
+
+      updateCartBadge() {
+        const count = this.cartItems.reduce((sum, item) => sum + item.quantity, 0);
+        document.querySelector('.cart-badge').textContent = count;
+      }
+
+      saveCart() {
+        localStorage.setItem('cart', JSON.stringify(this.cartItems));
+      }
+
+      loadCartFromStorage() {
+        const saved = localStorage.getItem('cart');
+        if (saved) {
+          this.cartItems = JSON.parse(saved);
+          this.updateCartBadge();
+        }
+      }
+
+      showNotification(detail) {
+        const notification = document.getElementById('notification');
+        notification.className = `notification show ${detail.type}`;
+        notification.textContent = detail.message;
+        
+        setTimeout(() => {
+          notification.classList.remove('show');
+        }, detail.duration || 3000);
+      }
+
+      loadMFEStyles(name) {
+        // Remove previous MFE styles
+        const existingStyle = document.getElementById('mfe-styles');
+        if (existingStyle) {
+          existingStyle.remove();
+        }
+
+        // Map MFE names to CSS files
+        const cssMap = {
+          'home': '/mfe-builds/home.css',
+          'products': '/mfe-builds/productCatalog.css',
+          'cart': '/mfe-builds/cart.css',
+          'checkout': null, // No specific styles
+          'orders': null // No specific styles
+        };
+
+        if (cssMap[name]) {
+          const link = document.createElement('link');
+          link.id = 'mfe-styles';
+          link.rel = 'stylesheet';
+          link.href = cssMap[name];
+          document.head.appendChild(link);
+        }
+      }
+
+      updateLoadingStatus(status, text) {
+        const indicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        
+        indicator.className = 'status-indicator';
+        if (status === 'loading') {
+          indicator.classList.add('loading');
+        } else if (status === 'error') {
+          indicator.style.background = '#e74c3c';
+        } else {
+          indicator.style.background = '#27ae60';
+        }
+        
+        statusText.textContent = text;
+      }
+    }
+
+    // Initialize the shell app
+    const app = new ShellApp();
+  </script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Catalog MFE</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f9f9f9;
+      padding: 2rem;
+    }
+    
+    .products-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+    
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-select {
+      padding: 0.75rem 1rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+      background: white;
+      cursor: pointer;
+    }
+    
+    .search-box {
+      flex: 1;
+      min-width: 300px;
+    }
+    
+    .search-box input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 50px;
+      font-size: 1rem;
+    }
+    
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .product-card {
+      background: white;
+      border-radius: 15px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.3s;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+    
+    .product-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    
+    .product-name {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    
+    .product-category {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .product-price {
+      font-size: 1.3rem;
+      color: #ee5a24;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    
+    .add-to-cart {
+      background: #ee5a24;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.5rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 100%;
+    }
+    
+    .add-to-cart:hover {
+      background: #d84315;
+    }
+    
+    .communication-info {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-top: 2rem;
+    }
+    
+    .communication-info h3 {
+      color: #ee5a24;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="products-container">
+    <div class="header">
+      <h1>Product Catalog</h1>
+      <p>Browse our wide selection of products</p>
+    </div>
+
+    <div class="filters">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search products...">
+      </div>
+      <select class="filter-select" id="categoryFilter">
+        <option value="all">All Categories</option>
+        <option value="Electronics">Electronics</option>
+        <option value="Fashion">Fashion</option>
+        <option value="Home">Home</option>
+        <option value="Sports">Sports</option>
+      </select>
+      <select class="filter-select" id="sortFilter">
+        <option value="name">Sort by Name</option>
+        <option value="price-low">Price: Low to High</option>
+        <option value="price-high">Price: High to Low</option>
+      </select>
+    </div>
+
+    <div class="products-grid" id="productsGrid"></div>
+
+    <div class="communication-info">
+      <h3>📡 PostMessage Communication</h3>
+      <p>This Product Catalog MFE demonstrates:</p>
+      <ul>
+        <li>Sending ADD_TO_CART messages when products are added</li>
+        <li>Receiving CART_UPDATED messages from shell</li>
+        <li>Handling search and filter events</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Product Catalog MFE
+    class ProductCatalogMFE {
+      constructor() {
+        this.products = [
+          { id: 1, name: 'Smartphone', price: 699, category: 'Electronics', icon: '📱' },
+          { id: 2, name: 'Laptop', price: 1299, category: 'Electronics', icon: '💻' },
+          { id: 3, name: 'Headphones', price: 199, category: 'Electronics', icon: '🎧' },
+          { id: 4, name: 'Smart Watch', price: 399, category: 'Electronics', icon: '⌚' },
+          { id: 5, name: 'Running Shoes', price: 89, category: 'Sports', icon: '👟' },
+          { id: 6, name: 'Yoga Mat', price: 29, category: 'Sports', icon: '🧘' },
+          { id: 7, name: 'Tennis Racket', price: 149, category: 'Sports', icon: '🎾' },
+          { id: 8, name: 'T-Shirt', price: 19, category: 'Fashion', icon: '👕' },
+          { id: 9, name: 'Jeans', price: 79, category: 'Fashion', icon: '👖' },
+          { id: 10, name: 'Dress', price: 99, category: 'Fashion', icon: '👗' },
+          { id: 11, name: 'Coffee Maker', price: 149, category: 'Home', icon: '☕' },
+          { id: 12, name: 'Desk Lamp', price: 39, category: 'Home', icon: '💡' },
+        ];
+        
+        this.filteredProducts = [...this.products];
+        this.targetOrigin = 'http://localhost:4000';
+        this.init();
+      }
+
+      init() {
+        this.renderProducts();
+        this.attachEventListeners();
+        this.setupMessageListener();
+      }
+
+      renderProducts() {
+        const grid = document.getElementById('productsGrid');
+        grid.innerHTML = this.filteredProducts.map(product => `
+          <div class="product-card">
+            <div class="product-icon">${product.icon}</div>
+            <div class="product-name">${product.name}</div>
+            <div class="product-category">${product.category}</div>
+            <div class="product-price">$${product.price}</div>
+            <button class="add-to-cart" data-product='${JSON.stringify(product)}'>
+              Add to Cart
+            </button>
+          </div>
+        `).join('');
+
+        // Attach click handlers to new buttons
+        grid.querySelectorAll('.add-to-cart').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const product = JSON.parse(e.target.dataset.product);
+            this.addToCart(product);
+          });
+        });
+      }
+
+      attachEventListeners() {
+        // Search
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+          this.filterProducts();
+        });
+
+        // Category filter
+        document.getElementById('categoryFilter').addEventListener('change', (e) => {
+          this.filterProducts();
+        });
+
+        // Sort
+        document.getElementById('sortFilter').addEventListener('change', (e) => {
+          this.sortProducts(e.target.value);
+        });
+      }
+
+      filterProducts() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const category = document.getElementById('categoryFilter').value;
+
+        this.filteredProducts = this.products.filter(product => {
+          const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
+                               product.category.toLowerCase().includes(searchTerm);
+          const matchesCategory = category === 'all' || product.category === category;
+          return matchesSearch && matchesCategory;
+        });
+
+        this.renderProducts();
+      }
+
+      sortProducts(sortBy) {
+        switch(sortBy) {
+          case 'name':
+            this.filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+          case 'price-low':
+            this.filteredProducts.sort((a, b) => a.price - b.price);
+            break;
+          case 'price-high':
+            this.filteredProducts.sort((a, b) => b.price - a.price);
+            break;
+        }
+        this.renderProducts();
+      }
+
+      addToCart(product) {
+        this.sendMessage('ADD_TO_CART', { product });
+      }
+
+      sendMessage(type, payload) {
+        if (window.parent !== window) {
+          window.parent.postMessage({
+            type,
+            payload,
+            timestamp: Date.now(),
+            source: 'Product Catalog MFE'
+          }, this.targetOrigin);
+        }
+      }
+
+      setupMessageListener() {
+        window.addEventListener('message', (event) => {
+          if (event.origin !== this.targetOrigin) return;
+          
+          const { type, payload } = event.data;
+          
+          switch(type) {
+            case 'CART_UPDATED':
+              console.log('Cart updated:', payload);
+              break;
+          }
+        });
+      }
+    }
+
+    // Initialize the MFE
+    new ProductCatalogMFE();
+  </script>
+</body>
+</html>

@@ -56,23 +56,29 @@ const Component = module.default;
 - Shared across all MFEs
 - Version management through import maps
 
-## Setup Instructions
+## Running the Demo
 
-### 1. Build MFEs as SystemJS modules
+### 1. Build the MFEs (One-time setup)
 ```bash
+# Navigate to the demo directory
 cd demo/importmaps-systemjs
+
+# Install dependencies
 npm install
+
+# Build all MFEs as ES modules
 npm run build:mfes
 ```
 
-### 2. Start the server
+### 2. Start the Server
+
+#### Option A: Using npm script (Recommended)
 ```bash
-npm run start
-# Or use any static server
-python3 -m http.server 5000
+npm start
+# Server will run at http://localhost:5000
 ```
 
-### 3. Open in browser
+### 3. Open in Browser
 Visit http://localhost:5000
 
 ## Browser Support

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home MFE</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f9f9f9;
+      padding: 2rem;
+    }
+    
+    .home-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .hero {
+      background: linear-gradient(135deg, #ee5a24 0%, #f79f1f 100%);
+      color: white;
+      padding: 3rem;
+      border-radius: 15px;
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .cta-button {
+      background: white;
+      color: #ee5a24;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    
+    .cta-button:hover {
+      transform: scale(1.05);
+    }
+    
+    .featured-products {
+      margin-bottom: 3rem;
+    }
+    
+    .featured-products h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #333;
+    }
+    
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+    
+    .product-card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    
+    .product-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    .product-name {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    
+    .product-price {
+      font-size: 1.3rem;
+      color: #ee5a24;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    
+    .add-to-cart {
+      background: #ee5a24;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.5rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .add-to-cart:hover {
+      background: #d84315;
+    }
+    
+    .communication-demo {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .communication-demo h2 {
+      color: #ee5a24;
+      margin-bottom: 1rem;
+    }
+    
+    .demo-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    
+    .demo-button {
+      padding: 0.5rem 1rem;
+      border: 2px solid #ee5a24;
+      background: white;
+      color: #ee5a24;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .demo-button:hover {
+      background: #ee5a24;
+      color: white;
+    }
+    
+    .message-status {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f0f0f0;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="home-container">
+    <!-- Hero Section -->
+    <div class="hero">
+      <h1>Welcome to E-Commerce iframe MFE</h1>
+      <p>Experience isolated microfrontends with postMessage communication</p>
+      <button class="cta-button" onclick="navigateToProducts()">
+        Shop Now →
+      </button>
+    </div>
+
+    <!-- Featured Products -->
+    <div class="featured-products">
+      <h2>Featured Products</h2>
+      <div class="products-grid">
+        <div class="product-card">
+          <div class="product-icon">📱</div>
+          <div class="product-name">Smartphone</div>
+          <div class="product-price">$699</div>
+          <button class="add-to-cart" onclick="addToCart({id: 1, name: 'Smartphone', price: 699})">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product-card">
+          <div class="product-icon">💻</div>
+          <div class="product-name">Laptop</div>
+          <div class="product-price">$1299</div>
+          <button class="add-to-cart" onclick="addToCart({id: 2, name: 'Laptop', price: 1299})">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product-card">
+          <div class="product-icon">🎧</div>
+          <div class="product-name">Headphones</div>
+          <div class="product-price">$199</div>
+          <button class="add-to-cart" onclick="addToCart({id: 3, name: 'Headphones', price: 199})">
+            Add to Cart
+          </button>
+        </div>
+        <div class="product-card">
+          <div class="product-icon">⌚</div>
+          <div class="product-name">Smart Watch</div>
+          <div class="product-price">$399</div>
+          <button class="add-to-cart" onclick="addToCart({id: 4, name: 'Smart Watch', price: 399})">
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Communication Demo -->
+    <div class="communication-demo">
+      <h2>🔄 PostMessage Communication Demo</h2>
+      <p>Click the buttons below to send messages to the shell application:</p>
+      
+      <div class="demo-buttons">
+        <button class="demo-button" onclick="navigateToProducts()">
+          Navigate to Products
+        </button>
+        <button class="demo-button" onclick="navigateToCart()">
+          Navigate to Cart
+        </button>
+        <button class="demo-button" onclick="requestCartData()">
+          Request Cart Data
+        </button>
+        <button class="demo-button" onclick="loginUser()">
+          Login User
+        </button>
+        <button class="demo-button" onclick="showNotification()">
+          Show Notification
+        </button>
+      </div>
+      
+      <div id="messageStatus" class="message-status">
+        Waiting for actions...
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // PostMessage Communication Helper
+    class MFECommunicator {
+      constructor() {
+        this.targetOrigin = 'http://localhost:4000'; // Shell origin
+        this.setupMessageListener();
+      }
+
+      sendMessage(type, payload) {
+        const message = {
+          type,
+          payload,
+          timestamp: Date.now(),
+          source: 'Home MFE'
+        };
+        
+        // Send to parent (shell)
+        if (window.parent !== window) {
+          window.parent.postMessage(message, this.targetOrigin);
+          this.updateStatus(`Sent: ${type}`, payload);
+        }
+      }
+
+      setupMessageListener() {
+        window.addEventListener('message', (event) => {
+          // Validate origin
+          if (event.origin !== this.targetOrigin) return;
+          
+          const { type, payload } = event.data;
+          
+          switch(type) {
+            case 'CART_UPDATED':
+              this.handleCartUpdate(payload);
+              break;
+            case 'USER_UPDATED':
+              this.handleUserUpdate(payload);
+              break;
+            case 'CART_DATA':
+              this.handleCartData(payload);
+              break;
+            default:
+              console.log('Received message:', type, payload);
+          }
+          
+          this.updateStatus(`Received: ${type}`, payload);
+        });
+      }
+
+      handleCartUpdate(payload) {
+        console.log('Cart updated:', payload);
+        // Could update UI to show cart count
+      }
+
+      handleUserUpdate(payload) {
+        console.log('User updated:', payload);
+        // Could update UI to show user info
+      }
+
+      handleCartData(payload) {
+        console.log('Cart data received:', payload);
+        alert(`Cart has ${payload.count} items, Total: $${payload.total.toFixed(2)}`);
+      }
+
+      updateStatus(action, data) {
+        const statusEl = document.getElementById('messageStatus');
+        statusEl.innerHTML = `
+          <strong>${action}</strong><br>
+          ${JSON.stringify(data, null, 2)}
+        `;
+      }
+    }
+
+    // Initialize communicator
+    const communicator = new MFECommunicator();
+
+    // Action functions
+    function navigateToProducts() {
+      communicator.sendMessage('NAVIGATE', { route: 'products' });
+    }
+
+    function navigateToCart() {
+      communicator.sendMessage('NAVIGATE', { route: 'cart' });
+    }
+
+    function addToCart(product) {
+      communicator.sendMessage('ADD_TO_CART', { 
+        product: { ...product, image: '📦' }
+      });
+    }
+
+    function requestCartData() {
+      communicator.sendMessage('REQUEST_CART_DATA', {});
+    }
+
+    function loginUser() {
+      communicator.sendMessage('USER_LOGIN', {
+        user: {
+          id: 1,
+          name: 'John Doe',
+          email: 'john@example.com'
+        }
+      });
+    }
+
+    function showNotification() {
+      communicator.sendMessage('SHOW_NOTIFICATION', {
+        type: 'info',
+        message: 'Hello from Home MFE!',
+        duration: 3000
+      });
+    }
+
+    // Auto-resize iframe based on content
+    function resizeIframe() {
+      const height = document.body.scrollHeight;
+      communicator.sendMessage('IFRAME_RESIZE', { height });
+    }
+
+    // Resize on load and when content changes
+    window.addEventListener('load', resizeIframe);
+    window.addEventListener('resize', resizeIframe);
+  </script>
+</body>
+</html>

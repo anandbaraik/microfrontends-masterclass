@@ -88,6 +88,10 @@ attributeChangedCallback(name, oldValue, newValue) {
 }
 ```
 
+## Running the Demo
+
+Just open the `index.html` file in the `demo/web-components` directory in a modern browser.
+
 ## Communication Patterns
 
 ### Event-Based Communication
@@ -105,22 +109,6 @@ All MFEs communicate through custom events:
 - Local state within each component
 - Shared state through custom events
 - Optional integration with state management libraries
-
-## Running the Demo
-
-```bash
-# No build step required!
-# Simply serve the files with any HTTP server
-
-# Using Python
-python3 -m http.server 5000
-
-# Using Node.js http-server
-npx http-server -p 5000
-
-# Using Live Server in VS Code
-# Right-click index.html -> Open with Live Server
-```
 
 ## Browser Support
 

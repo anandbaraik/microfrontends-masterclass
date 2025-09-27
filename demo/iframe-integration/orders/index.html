@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders MFE</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f9f9f9;
+      padding: 2rem;
+    }
+    
+    .orders-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      color: #333;
+    }
+    
+    .login-prompt {
+      background: white;
+      border-radius: 15px;
+      padding: 3rem;
+      text-align: center;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    }
+    
+    .login-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    
+    .login-btn {
+      background: #ee5a24;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 1rem;
+    }
+    
+    .login-btn:hover {
+      background: #d84315;
+      transform: scale(1.05);
+    }
+    
+    .orders-list {
+      display: grid;
+      gap: 1.5rem;
+    }
+    
+    .order-card {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+      transition: all 0.3s;
+    }
+    
+    .order-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 25px rgba(0,0,0,0.12);
+    }
+    
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .order-id {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .order-date {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .order-status {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    
+    .status-delivered {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status-shipped {
+      background: #cce5ff;
+      color: #004085;
+    }
+    
+    .status-processing {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .order-items {
+      margin-bottom: 1rem;
+    }
+    
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      color: #666;
+    }
+    
+    .order-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid #f0f0f0;
+    }
+    
+    .order-total {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #ee5a24;
+    }
+    
+    .track-btn {
+      background: #ee5a24;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.5rem;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .track-btn:hover {
+      background: #d84315;
+      transform: scale(1.05);
+    }
+    
+    .empty-orders {
+      background: white;
+      border-radius: 15px;
+      padding: 3rem;
+      text-align: center;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    }
+    
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    
+    .shop-btn {
+      background: #ee5a24;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="orders-container">
+    <h1>My Orders</h1>
+    <div id="ordersContent"></div>
+  </div>
+
+  <script>
+    // Orders MFE
+    class OrdersMFE {
+      constructor() {
+        this.user = null;
+        this.targetOrigin = 'http://localhost:4000';
+        
+        // Mock orders data
+        this.orders = [
+          {
+            id: 'ORD-2024-001',
+            date: '2024-01-15',
+            status: 'Delivered',
+            total: 459.97,
+            items: [
+              { name: 'Laptop', quantity: 1, price: 399.99 },
+              { name: 'Mouse', quantity: 2, price: 29.99 }
+            ]
+          },
+          {
+            id: 'ORD-2024-002',
+            date: '2024-01-20',
+            status: 'Shipped',
+            total: 189.98,
+            items: [
+              { name: 'Headphones', quantity: 1, price: 149.99 },
+              { name: 'USB Cable', quantity: 2, price: 19.99 }
+            ]
+          },
+          {
+            id: 'ORD-2024-003',
+            date: '2024-01-25',
+            status: 'Processing',
+            total: 89.99,
+            items: [
+              { name: 'Keyboard', quantity: 1, price: 89.99 }
+            ]
+          }
+        ];
+        
+        this.init();
+      }
+
+      init() {
+        // Request user data from shell
+        this.sendMessage('REQUEST_USER_DATA', {});
+        this.setupMessageListener();
+        this.render();
+      }
+
+      setupMessageListener() {
+        window.addEventListener('message', (event) => {
+          if (event.origin !== this.targetOrigin) return;
+          
+          const { type, payload } = event.data;
+          
+          switch(type) {
+            case 'USER_DATA':
+            case 'USER_UPDATED':
+              this.user = payload.user;
+              this.render();
+              break;
+          }
+        });
+      }
+
+      render() {
+        const container = document.getElementById('ordersContent');
+        
+        if (!this.user) {
+          container.innerHTML = `
+            <div class="login-prompt">
+              <div class="login-icon">👤</div>
+              <h2>Please log in to view your orders</h2>
+              <p>Sign in to access your order history and tracking information</p>
+              <button class="login-btn" onclick="orders.login()">
+                Log In
+              </button>
+            </div>
+          `;
+        } else if (this.orders.length === 0) {
+          container.innerHTML = `
+            <div class="empty-orders">
+              <div class="empty-icon">📦</div>
+              <h2>No orders yet</h2>
+              <p>Start shopping to see your orders here</p>
+              <button class="shop-btn" onclick="orders.startShopping()">
+                Start Shopping
+              </button>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="orders-list">
+              ${this.orders.map(order => `
+                <div class="order-card">
+                  <div class="order-header">
+                    <div>
+                      <div class="order-id">Order #${order.id}</div>
+                      <div class="order-date">Placed on ${new Date(order.date).toLocaleDateString()}</div>
+                    </div>
+                    <div class="order-status status-${order.status.toLowerCase()}">
+                      ${order.status}
+                    </div>
+                  </div>
+                  
+                  <div class="order-items">
+                    ${order.items.map(item => `
+                      <div class="order-item">
+                        <div>
+                          <span>${item.name}</span>
+                          <small> x${item.quantity}</small>
+                        </div>
+                        <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                  
+                  <div class="order-footer">
+                    <div class="order-total">
+                      Total: $${order.total.toFixed(2)}
+                    </div>
+                    <button class="track-btn" onclick="orders.trackOrder('${order.id}')">
+                      Track Order
+                    </button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+      }
+
+      login() {
+        // Simulate login
+        this.sendMessage('USER_LOGIN', {
+          user: {
+            id: 1,
+            name: 'John Doe',
+            email: 'john@example.com'
+          }
+        });
+      }
+
+      startShopping() {
+        this.sendMessage('NAVIGATE', { route: 'products' });
+      }
+
+      trackOrder(orderId) {
+        this.sendMessage('SHOW_NOTIFICATION', {
+          type: 'info',
+          message: `Tracking information for order ${orderId} will be sent to your email`,
+          duration: 4000
+        });
+      }
+
+      sendMessage(type, payload) {
+        if (window.parent !== window) {
+          window.parent.postMessage({
+            type,
+            payload,
+            timestamp: Date.now(),
+            source: 'Orders MFE'
+          }, this.targetOrigin);
+        }
+      }
+    }
+
+    // Initialize and make globally accessible
+    const orders = new OrdersMFE();
+  </script>
+</body>
+</html>

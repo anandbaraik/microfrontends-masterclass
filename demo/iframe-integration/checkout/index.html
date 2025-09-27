@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout MFE</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f9f9f9;
+      padding: 2rem;
+    }
+    
+    .checkout-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      color: #333;
+    }
+    
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 2rem;
+    }
+    
+    @media (max-width: 968px) {
+      .checkout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .checkout-form {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    }
+    
+    .form-section {
+      margin-bottom: 2rem;
+    }
+    
+    .form-section h2 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: #ee5a24;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    .order-summary {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+      height: fit-content;
+    }
+    
+    .order-items {
+      margin-bottom: 1.5rem;
+    }
+    
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      color: #666;
+    }
+    
+    .summary-row.total {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #333;
+      padding-top: 1rem;
+      border-top: 2px solid #f0f0f0;
+    }
+    
+    .place-order-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #ee5a24 0%, #f79f1f 100%);
+      color: white;
+      border: none;
+      padding: 1rem;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 1.5rem;
+    }
+    
+    .place-order-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 5px 20px rgba(238, 90, 36, 0.4);
+    }
+    
+    .empty-checkout {
+      background: white;
+      border-radius: 15px;
+      padding: 3rem;
+      text-align: center;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    }
+    
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    
+    .back-to-cart {
+      background: #ee5a24;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="checkout-container">
+    <h1>Checkout</h1>
+    <div id="checkoutContent"></div>
+  </div>
+
+  <script>
+    // Checkout MFE
+    class CheckoutMFE {
+      constructor() {
+        this.items = [];
+        this.user = null;
+        this.targetOrigin = 'http://localhost:4000';
+        this.init();
+      }
+
+      init() {
+        this.setupMessageListener();
+        // Request cart and user data from shell
+        this.sendMessage('REQUEST_CART_DATA', {});
+        this.sendMessage('REQUEST_USER_DATA', {});
+        // Initial render
+        setTimeout(() => this.render(), 100);
+      }
+
+      setupMessageListener() {
+        window.addEventListener('message', (event) => {
+          if (event.origin !== this.targetOrigin) return;
+          
+          const { type, payload } = event.data;
+          
+          switch(type) {
+            case 'CART_DATA':
+            case 'CART_UPDATED':
+              this.items = payload.items || [];
+              this.render();
+              break;
+            case 'USER_DATA':
+            case 'USER_UPDATED':
+              this.user = payload.user;
+              this.render();
+              break;
+          }
+        });
+      }
+
+      render() {
+        const container = document.getElementById('checkoutContent');
+        
+        if (this.items.length === 0) {
+          container.innerHTML = `
+            <div class="empty-checkout">
+              <div class="empty-icon">📦</div>
+              <h2>No items in checkout</h2>
+              <p>Please add items to your cart first</p>
+              <button class="back-to-cart" id="backToCartBtn">
+                Back to Cart
+              </button>
+            </div>
+          `;
+          
+          // Attach event listener for back to cart button
+          const backBtn = document.getElementById('backToCartBtn');
+          if (backBtn) {
+            backBtn.addEventListener('click', () => this.navigateToCart());
+          }
+        } else {
+          const subtotal = this.calculateSubtotal();
+          const tax = subtotal * 0.08;
+          const total = subtotal + tax;
+
+          container.innerHTML = `
+            <div class="checkout-grid">
+              <div class="checkout-form">
+                <form id="checkoutForm">
+                  <div class="form-section">
+                    <h2>Shipping Information</h2>
+                    <div class="form-group">
+                      <label for="fullName">Full Name</label>
+                      <input type="text" id="fullName" required value="${this.user?.name || ''}">
+                    </div>
+                    <div class="form-group">
+                      <label for="email">Email</label>
+                      <input type="email" id="email" required value="${this.user?.email || ''}">
+                    </div>
+                    <div class="form-group">
+                      <label for="address">Street Address</label>
+                      <input type="text" id="address" required>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city" required>
+                      </div>
+                      <div class="form-group">
+                        <label for="zipCode">Zip Code</label>
+                        <input type="text" id="zipCode" required>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-section">
+                    <h2>Payment Information</h2>
+                    <div class="form-group">
+                      <label for="cardNumber">Card Number</label>
+                      <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" required>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="expiry">Expiry Date</label>
+                        <input type="text" id="expiry" placeholder="MM/YY" required>
+                      </div>
+                      <div class="form-group">
+                        <label for="cvv">CVV</label>
+                        <input type="text" id="cvv" placeholder="123" required>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <button type="submit" class="place-order-btn" id="placeOrderBtn">
+                    Place Order
+                  </button>
+                </form>
+              </div>
+              
+              <div class="order-summary">
+                <h2>Order Summary</h2>
+                <div class="order-items">
+                  ${this.items.map(item => `
+                    <div class="order-item">
+                      <div>
+                        <div>${item.name}</div>
+                        <small>Qty: ${item.quantity}</small>
+                      </div>
+                      <div>$${(item.price * item.quantity).toFixed(2)}</div>
+                    </div>
+                  `).join('')}
+                </div>
+                
+                <div class="summary-row">
+                  <span>Subtotal:</span>
+                  <span>$${subtotal.toFixed(2)}</span>
+                </div>
+                <div class="summary-row">
+                  <span>Tax (8%):</span>
+                  <span>$${tax.toFixed(2)}</span>
+                </div>
+                <div class="summary-row">
+                  <span>Shipping:</span>
+                  <span>Free</span>
+                </div>
+                <div class="summary-row total">
+                  <span>Total:</span>
+                  <span>$${total.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          // Attach event listeners after rendering
+          this.attachEventListeners();
+        }
+      }
+
+      calculateSubtotal() {
+        return this.items.reduce((total, item) => total + (item.price * item.quantity), 0);
+      }
+
+      attachEventListeners() {
+        const form = document.getElementById('checkoutForm');
+        if (form) {
+          form.addEventListener('submit', (e) => this.placeOrder(e));
+        }
+      }
+
+      placeOrder(event) {
+        event.preventDefault();
+        console.log('Place order clicked');
+        
+        const form = document.getElementById('checkoutForm');
+        if (!form) {
+          console.log('Form not found');
+          return;
+        }
+        
+        // Check form validity
+        if (!form.checkValidity()) {
+          console.log('Form is not valid');
+          form.reportValidity();
+          return;
+        }
+        
+        console.log('Form is valid, placing order...');
+        const orderId = 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        
+        // Show success notification
+        this.sendMessage('SHOW_NOTIFICATION', {
+          type: 'success',
+          message: `Order ${orderId} placed successfully!`,
+          duration: 5000
+        });
+        
+        // Clear cart
+        this.sendMessage('CLEAR_CART', {});
+        
+        // Navigate to orders after delay
+        setTimeout(() => {
+          this.sendMessage('NAVIGATE', { route: 'orders' });
+        }, 2000);
+      }
+
+      navigateToCart() {
+        this.sendMessage('NAVIGATE', { route: 'cart' });
+      }
+
+      sendMessage(type, payload) {
+        if (window.parent !== window) {
+          window.parent.postMessage({
+            type,
+            payload,
+            timestamp: Date.now(),
+            source: 'Checkout MFE'
+          }, this.targetOrigin);
+        }
+      }
+    }
+
+    // Initialize and make globally accessible
+    const checkout = new CheckoutMFE();
+  </script>
+</body>
+</html>

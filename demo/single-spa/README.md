@@ -95,9 +95,12 @@ single-spa/
 └── package.json        # Build scripts and dependencies
 ```
 
-## Getting Started
+## Running the Demo
 
 ```bash
+# Navigate to the demo directory
+cd demo/single-spa
+
 # Install dependencies
 npm install
 

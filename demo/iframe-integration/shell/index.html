@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Commerce MFE - iframe Integration</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <h1 class="logo">🛍️ E-Commerce iframe MFE</h1>
+        <nav class="main-nav">
+          <button data-route="home" class="nav-btn active">Home</button>
+          <button data-route="products" class="nav-btn">Products</button>
+          <button data-route="cart" class="nav-btn">
+            Cart <span class="cart-count">0</span>
+          </button>
+          <button data-route="checkout" class="nav-btn">Checkout</button>
+          <button data-route="orders" class="nav-btn">Orders</button>
+        </nav>
+        <div class="user-info">
+          <span id="userName">Guest</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <div class="iframe-container">
+        <iframe 
+          id="mfe-frame" 
+          src="http://localhost:4001"
+          title="Microfrontend"
+          sandbox="allow-scripts allow-same-origin allow-forms"
+        ></iframe>
+      </div>
+    </main>
+
+    <!-- Message Log -->
+    <div class="message-log">
+      <h3>📡 PostMessage Communication Log</h3>
+      <div id="messageLog" class="log-content"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>iframe Integration Demo - Cross-MFE Communication via postMessage</p>
+    </footer>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="notification" class="notification"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
